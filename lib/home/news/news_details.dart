@@ -18,23 +18,20 @@ class NewsDetails extends StatefulWidget {
 class _NewsDetailsState extends State<NewsDetails> {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => HomeCubit(),
-      child: BlocBuilder<HomeCubit, HomeState>(
-        builder: (context, state) {
-          var bloc = BlocProvider.of<HomeCubit>(context);
-          var list = bloc.newsResponse?.articles ?? [];
-          return ListView.separated(
-            separatorBuilder: (context, index) => SizedBox(
-              height: 25,
-            ),
-            itemBuilder: (context, index) {
-              return NewsItem(articles: list[index]);
-            },
-            itemCount: list.length ?? 0,
-          );
-        },
-      ),
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        HomeCubit viewModel = context.read<HomeCubit>();
+        var list = viewModel.newsResponse?.articles ?? [];
+        return ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(
+            height: 25,
+          ),
+          itemBuilder: (context, index) {
+            return NewsItem(articles: list[index]);
+          },
+          itemCount: list.length ?? 0,
+        );
+      },
     );
   }
 }

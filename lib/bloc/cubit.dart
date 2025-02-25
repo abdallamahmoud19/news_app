@@ -14,9 +14,10 @@ class HomeCubit extends Cubit<HomeState> {
 
   HomeCubit() : super(InitHomeState());
 
-  changeSelectedIndex(int index) {
+  changeSelectedIndex(int index) async {
     selectedIndex = index;
     emit(ChangeSelectedTabState());
+    await getNews();
   }
 
   getSources(String categoryName) async {
@@ -25,20 +26,23 @@ class HomeCubit extends Cubit<HomeState> {
       Endpoints.unencodedPathSoures,
       {'apiKey': ApiConstant.apiKey, 'category': categoryName},
     );
+    emit(GetSourcesLoadingState());
+
     try {
-      emit(GetSourcesLoadingState());
       var response = await http.get(url);
       var bodyStringResponse = response.body;
       var json = jsonDecode(bodyStringResponse);
       sourceResponse = SourceResponse.fromJson(json);
-      getNews();
-      emit(GetNewsSuccessState());
+      emit(GetSourcesSuccessState());
+      await getNews();
     } catch (e) {
       emit(GetSourcesErrorState());
     }
   }
 
   getNews() async {
+    emit(GetNewsLoadingState());
+
     Uri url = Uri.https(
       ApiConstant.bassUrl,
       Endpoints.unencodedPathNews,
@@ -47,8 +51,8 @@ class HomeCubit extends Cubit<HomeState> {
         'sources': sourceResponse?.sources?[selectedIndex].id ?? '',
       },
     );
+
     try {
-      emit(GetNewsLoadingState());
       var response = await http.get(url);
       var bodyStringResponse = response.body;
       var json = jsonDecode(bodyStringResponse);
